@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Routine">
     <title>My Routine</title>
+
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%234A90E2%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-size=%2270%22>🎉</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%234A90E2%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-size=%2270%22>🎉</text></svg>">
+
     <style>
         :root {
             --primary: #4A90E2;
@@ -19,11 +25,11 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg);
             margin: 0;
-            /* Remove padding from body so header sits flush at top */
             padding: 0;
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            height: 100vh; /* Fallback */
+            height: 100dvh; /* Dynamic viewport height for mobile */
             box-sizing: border-box;
             overflow: hidden;
             transition: background-color 0.5s;
@@ -36,16 +42,16 @@
         
         body.evening-mode h1 { color: var(--evening-text); }
 
-        /* NEW TOP HEADER LAYOUT */
+        /* HEADER */
         header {
             display: flex;
-            justify-content: space-between; /* Push items to edges */
+            justify-content: space-between;
             align-items: center;
             padding: 15px 20px;
-            background: rgba(255,255,255,0.1); /* Subtle transparency */
+            padding-top: max(15px, env(safe-area-inset-top)); /* Safe area for notch */
+            background: rgba(255,255,255,0.1);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             z-index: 100;
         }
 
@@ -75,23 +81,15 @@
             transform: scale(1.1);
         }
 
-        /* TOP RIGHT CONTROLS */
-        .top-controls {
-            display: flex;
-            gap: 10px;
-        }
+        /* CONTROLS */
+        .top-controls { display: flex; gap: 10px; }
 
         .icon-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            border: none;
+            width: 44px; height: 44px;
+            border-radius: 50%; border: none;
             font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            background: white;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; background: white;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             transition: transform 0.1s;
         }
@@ -99,13 +97,8 @@
         .icon-btn:active { transform: scale(0.9); }
         .reset-btn { color: var(--danger); }
 
-        /* TITLE */
         h1 {
-            text-align: center;
-            color: #333;
-            margin: 10px 0 10px 0;
-            font-size: 1.5rem;
-            flex-shrink: 0;
+            text-align: center; color: #333; margin: 10px 0 10px 0; font-size: 1.5rem; flex-shrink: 0;
         }
 
         /* GRID */
@@ -116,18 +109,15 @@
             flex-grow: 1;
             overflow-y: auto;
             padding: 20px;
-            /* Extra padding at bottom so banner doesn't cover tasks */
-            padding-bottom: 80px; 
+            padding-bottom: 100px; /* Space for scrolling */
+            -webkit-overflow-scrolling: touch;
         }
 
         .task-card {
             background: var(--card-bg);
             border-radius: 20px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
             aspect-ratio: 1;
             cursor: pointer;
             transition: transform 0.2s;
@@ -138,138 +128,62 @@
         }
 
         .task-card:active { transform: scale(0.95); }
-
         .task-emoji { font-size: 4rem; margin-bottom: 10px; }
         .task-label { font-size: 1.2rem; font-weight: bold; color: #555; text-align: center; }
 
         .task-card.done {
-            background-color: #E8F8F5;
-            border-color: var(--success);
-            opacity: 0.6;
+            background-color: #E8F8F5; border-color: var(--success); opacity: 0.6;
         }
 
         .task-card.done .task-emoji::after {
-            content: '✅';
-            position: absolute;
-            font-size: 3rem;
-            transform: translate(-50%, -50%);
-            left: 50%; top: 50%;
+            content: '✅'; position: absolute; font-size: 3rem;
+            transform: translate(-50%, -50%); left: 50%; top: 50%;
         }
-        
         .task-card.done .task-emoji { opacity: 0.3; }
 
-
-        /* SETTINGS MODAL */
+        /* SETTINGS */
         #settings-modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: white;
-            z-index: 200;
-            padding: 20px;
-            box-sizing: border-box;
-            flex-direction: column;
-            color: #333;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 200; padding: 20px; box-sizing: border-box;
+            flex-direction: column; color: #333;
+            padding-top: max(20px, env(safe-area-inset-top));
         }
 
         .settings-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 10px;
-            flex-shrink: 0;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 10px; flex-shrink: 0;
         }
 
-        #settings-content {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding-bottom: 50px;
-        }
+        #settings-content { flex-grow: 1; overflow-y: auto; padding-bottom: 50px; }
 
         .task-editor-row {
-            display: flex;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-            gap: 10px;
+            display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; gap: 10px;
         }
 
-        /* Checkbox */
-        .task-editor-row input[type="checkbox"] {
-            transform: scale(1.5);
-            margin: 0 10px;
-        }
-
-        /* Inputs */
-        .edit-emoji {
-            width: 40px;
-            font-size: 1.5rem;
-            text-align: center;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 5px;
-        }
-        
-        .edit-label {
-            flex-grow: 1;
-            font-size: 1rem;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        .delete-btn {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            cursor: pointer;
-            color: #ccc;
-            padding: 0 10px;
-        }
+        .task-editor-row input[type="checkbox"] { transform: scale(1.5); margin: 0 10px; }
+        .edit-emoji { width: 40px; font-size: 1.5rem; text-align: center; border: 1px solid #ddd; border-radius: 5px; padding: 5px; }
+        .edit-label { flex-grow: 1; font-size: 1rem; padding: 8px; border: 1px solid #ddd; border-radius: 5px; }
+        .delete-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #ccc; padding: 0 10px; }
         .delete-btn:hover { color: var(--danger); }
 
         .add-btn {
-            width: 100%;
-            padding: 15px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            margin-top: 20px;
-            cursor: pointer;
+            width: 100%; padding: 15px; background: var(--primary); color: white;
+            border: none; border-radius: 10px; font-size: 1.1rem; margin-top: 20px; cursor: pointer;
         }
         
-        button.control-btn {
-            background: #eee; border: none; padding: 10px 20px; border-radius: 10px; font-size: 1rem; color: #555;
-        }
+        button.control-btn { background: #eee; border: none; padding: 10px 20px; border-radius: 10px; font-size: 1rem; color: #555; }
 
         /* CELEBRATION */
         #celebration {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            z-index: 300;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            color: white;
-            text-align: center;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 300; align-items: center; justify-content: center;
+            flex-direction: column; color: white; text-align: center;
         }
-        
         #celebration h1 { color: white; font-size: 3rem; margin: 20px 0; }
         .big-star { font-size: 8rem; animation: spin 3s infinite linear; }
-        
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        #confetti-canvas {
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none; z-index: 301;
-        }
+        #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 301; }
     </style>
 </head>
 <body>
@@ -279,7 +193,6 @@
             <button class="mode-btn active" id="btn-morning" onclick="setMode('morning')">☀️</button>
             <button class="mode-btn" id="btn-evening" onclick="setMode('evening')">🌙</button>
         </div>
-
         <div class="top-controls">
             <button class="icon-btn" onclick="openSettings()" aria-label="Settings">⚙️</button>
             <button class="icon-btn reset-btn" onclick="resetRoutine()" aria-label="Reset">🔄</button>
@@ -290,14 +203,12 @@
 
     <div id="routine-grid"></div>
 
-    <div id="settings-modal" style="display:none;">
+    <div id="settings-modal">
         <div class="settings-header">
             <h2 id="settings-title">Edit Morning Tasks</h2>
             <button class="control-btn" onclick="closeSettings()">Done</button>
         </div>
-        <div style="margin-bottom:10px; color:#666; font-size:0.9rem;">
-            Check to Show. Edit text/emoji to customize.
-        </div>
+        <div style="margin-bottom:10px; color:#666; font-size:0.9rem;">Check to Show. Edit text to customize.</div>
         <div id="settings-content">
             <div id="settings-list"></div>
             <button class="add-btn" onclick="addNewTask()">+ Add New Task</button>
@@ -312,9 +223,7 @@
     <canvas id="confetti-canvas"></canvas>
 
 <script>
-    // --- DATA MANAGEMENT ---
-    
-    // Default Tasks
+    // --- DATA ---
     const defaults = [
         { id: 'potty', label: 'Potty', emoji: '🚽' },
         { id: 'hands', label: 'Wash Hands', emoji: '🧼' },
@@ -336,17 +245,11 @@
     ];
 
     let allTasks = JSON.parse(localStorage.getItem('myRoutineAllTasks')) || defaults;
-
     let taskLists = JSON.parse(localStorage.getItem('myRoutineLists')) || {
         morning: ['potty', 'breakfast', 'dressed', 'teeth', 'shoes'],
         evening: ['dinner', 'bath', 'pjs', 'teeth', 'book', 'bed']
     };
-    
-    let completedState = JSON.parse(localStorage.getItem('myRoutineState')) || {
-        morning: [],
-        evening: []
-    };
-
+    let completedState = JSON.parse(localStorage.getItem('myRoutineState')) || { morning: [], evening: [] };
     let currentMode = 'morning';
 
     const grid = document.getElementById('routine-grid');
@@ -354,9 +257,7 @@
     const celebrationModal = document.getElementById('celebration');
     const pageTitle = document.getElementById('page-title');
 
-    function init() {
-        setMode('morning');
-    }
+    function init() { setMode('morning'); }
 
     function saveAll() {
         localStorage.setItem('myRoutineAllTasks', JSON.stringify(allTasks));
@@ -380,7 +281,7 @@
         const validIDs = activeIDs.filter(id => allTasks.find(t => t.id === id));
         
         if (validIDs.length === 0) {
-            grid.innerHTML = '<p style="text-align:center; width:100%; color:#999; margin-top:20px;">No tasks set for this time. Tap ⚙️ to add some!</p>';
+            grid.innerHTML = '<p style="text-align:center; width:100%; color:#999; margin-top:20px;">No tasks set. Tap ⚙️ to add some!</p>';
             return;
         }
 
@@ -389,19 +290,15 @@
             const card = document.createElement('div');
             card.className = `task-card ${doneIDs.includes(id) ? 'done' : ''}`;
             card.onclick = () => toggleTask(id);
-            card.innerHTML = `
-                <div class="task-emoji">${task.emoji}</div>
-                <div class="task-label">${task.label}</div>
-            `;
+            card.innerHTML = `<div class="task-emoji">${task.emoji}</div><div class="task-label">${task.label}</div>`;
             grid.appendChild(card);
         });
     }
 
     function toggleTask(id) {
         let doneTasks = completedState[currentMode];
-        if (doneTasks.includes(id)) {
-            doneTasks = doneTasks.filter(t => t !== id);
-        } else {
+        if (doneTasks.includes(id)) { doneTasks = doneTasks.filter(t => t !== id); }
+        else {
             doneTasks.push(id);
             if (isAllDone(doneTasks)) setTimeout(triggerCelebration, 500);
         }
@@ -423,19 +320,12 @@
         }
     }
 
-    function triggerCelebration() {
-        celebrationModal.style.display = 'flex';
-        startConfetti();
-    }
-
-    function closeCelebration() {
-        celebrationModal.style.display = 'none';
-        stopConfetti();
-    }
+    function triggerCelebration() { celebrationModal.style.display = 'flex'; startConfetti(); }
+    function closeCelebration() { celebrationModal.style.display = 'none'; stopConfetti(); }
 
     function openSettings() {
         document.getElementById('settings-modal').style.display = 'flex';
-        document.getElementById('settings-title').innerText = currentMode === 'morning' ? "Edit Morning Tasks" : "Edit Evening Tasks";
+        document.getElementById('settings-title').innerText = currentMode === 'morning' ? "Edit Morning" : "Edit Evening";
         renderSettingsList();
     }
 
@@ -447,13 +337,10 @@
     function renderSettingsList() {
         settingsList.innerHTML = '';
         const activeIDs = taskLists[currentMode];
-
         allTasks.forEach(task => {
             const row = document.createElement('div');
             row.className = 'task-editor-row';
-            
             const isChecked = activeIDs.includes(task.id);
-            
             row.innerHTML = `
                 <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSettingSelection('${task.id}')">
                 <input type="text" class="edit-emoji" value="${task.emoji}" onchange="updateTaskProp('${task.id}', 'emoji', this.value)">
@@ -466,21 +353,14 @@
 
     function toggleSettingSelection(id) {
         let list = taskLists[currentMode];
-        if (list.includes(id)) {
-            list = list.filter(t => t !== id);
-        } else {
-            list.push(id);
-        }
+        if (list.includes(id)) { list = list.filter(t => t !== id); } else { list.push(id); }
         taskLists[currentMode] = list;
         saveAll();
     }
 
     function updateTaskProp(id, prop, value) {
         const task = allTasks.find(t => t.id === id);
-        if (task) {
-            task[prop] = value;
-            saveAll();
-        }
+        if (task) { task[prop] = value; saveAll(); }
     }
 
     function addNewTask() {
@@ -507,14 +387,11 @@
     const canvas = document.getElementById('confetti-canvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
-
     function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
-
     function startConfetti() { confettiActive = true; particles = []; animateConfetti(); }
     function stopConfetti() { confettiActive = false; ctx.clearRect(0, 0, canvas.width, canvas.height); }
-
     function createParticle() {
         const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800', '#ff5722'];
         return {
@@ -525,7 +402,6 @@
             rotation: Math.random() * 360, rotationSpeed: Math.random() * 10 - 5
         };
     }
-
     function animateConfetti() {
         if (!confettiActive && particles.length === 0) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -541,7 +417,6 @@
     }
 
     init();
-
 </script>
 </body>
 </html>
