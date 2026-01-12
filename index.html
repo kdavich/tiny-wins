@@ -23,7 +23,7 @@
             --morning-bg: #F0F4F8;
             --morning-text: #333;
             
-            --afternoon-bg: #FDEBD0; /* Soft Orange */
+            --afternoon-bg: #FFF3E0; /* Warm Afternoon */
             --afternoon-text: #5D4037;
             
             --evening-bg: #2C3E50;
@@ -257,6 +257,7 @@
         { id: 'hands', label: 'Wash Hands', emoji: '🧼' },
         { id: 'breakfast', label: 'Eat Breakfast', emoji: '🥞' },
         { id: 'lunch', label: 'Eat Lunch', emoji: '🥪' },
+        { id: 'snack', label: 'Eat Snack', emoji: '🍎' },
         { id: 'dinner', label: 'Eat Dinner', emoji: '🍽️' },
         { id: 'bath', label: 'Bath Time', emoji: '🛁' },
         { id: 'pjs', label: 'Pajamas', emoji: '👕' },
@@ -276,9 +277,10 @@
 
     let allTasks = JSON.parse(localStorage.getItem('myRoutineAllTasks')) || defaults;
     
+    // Updated Afternoon Defaults included below
     let taskLists = JSON.parse(localStorage.getItem('myRoutineLists')) || {
-        morning: ['potty', 'breakfast', 'dressed', 'teeth', 'shoes'],
-        afternoon: ['lunch', 'nap', 'potty', 'park'],
+        morning: ['potty', 'hands', 'breakfast', 'dressed', 'teeth', 'shoes'],
+        afternoon: ['hands', 'lunch', 'potty', 'book', 'nap'],
         evening: ['dinner', 'bath', 'pjs', 'teeth', 'book', 'bed']
     };
     
@@ -441,11 +443,9 @@
         
         taskLists[currentMode] = newOrder;
         saveAll();
-        // Don't re-render Settings here, or it jumps. Only render Grid on close.
     }
 
     function toggleSettingSelection(id) {
-        // Just run the order update, it handles checks/unchecks based on DOM
         updateOrderFromDOM();
     }
 
